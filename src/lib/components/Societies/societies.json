@@ -30,15 +30,26 @@
 		"githuburl": "https://github.com/svelte-meetup-hamburg/meetups/issues"
 	},
 	{
-		"name": "Amsterdam SvelteJS",
-		"country": "🇳🇱 Netherlands",
-		"url": "https://www.meetup.com/Amsterdam-SvelteJS/"
+		"name": "Svelte Berlin",
+		"country": "🇩🇪 Germany",
+		"githuburl": "https://github.com/nika-d/svelte-berlin"
 	},
 	{
-		"name": "Svelte Bergen",
+		"name": "Svelte Zurich",
+		"country": "🇨🇭 Switzerland",
+		"url": "https://guild.host/svelte-society-zurich/events",
+		"discord": "https://discord.gg/5mZGndNUkw"
+	},
+	{
+		"name": "Amsterdam SvelteJS",
+		"country": "🇳🇱 Netherlands",
+		"url": "https://www.meetup.com/Amsterdam-SvelteJS/",
+		"discord": "https://discord.gg/YWbEhX99"
+	},
+	{
+		"name": "Svelte Norway",
 		"country": "🇳🇴 Norway",
-		"twitter": "@stephanevanraes",
-		"url": "https://www.downtomeet.com/Svelte-Bergen"
+		"discord": "https://discord.gg/Agneq5jQ7P"
 	},
 	{
 		"name": "Svelte Society Stockholm",
@@ -99,5 +110,14 @@
 		"name": "Svelte Malaysia",
 		"country": "🇲🇾 Malaysia",
 		"url": "https://www.facebook.com/groups/1049534299333802"
+	},
+	{
+		"name": "Svelte Vietnam",
+		"country": "🇻🇳 Vietnam",
+		"url": "https://www.sveltevietnam.dev",
+		"twitter": "@sveltevietnam",
+		"githuburl": "https://github.com/sveltevietnam",
+		"discord": "https://discord.sveltevietnam.dev",
+		"youtube": "https://www.youtube.com/@sveltevietnam"
 	}
 ]

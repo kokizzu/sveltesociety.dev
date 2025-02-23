@@ -1,31 +1,24 @@
 <script lang="ts">
 	import SvelteSelect from 'svelte-select';
-	import components from '../../components/components.json';
+	import packages from '../../packages/packages.json';
 	import templates from '../../templates/templates.json';
-	import tools from '../../tools/tools.json';
 	import { onMount, tick } from 'svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
-	import { extractUnique } from '$lib/utils/extractUnique';
+	import { getCategories } from '$utils/getCategories';
 	import Seo from '$lib/components/Seo.svelte';
 
 	const repoURL = 'https://github.com/svelte-society/sveltesociety.dev';
-	const types = ['Component', 'Template', 'Tool'].map((t) => ({
+	const types = ['Package', 'Template'].map((t) => ({
 		label: t,
 		value: t.toLowerCase()
 	}));
 
 	const data = {
-		component: {
-			tags: extractUnique(components, 'tags'),
-			categories: [...extractUnique(components, 'category').filter((cat) => cat.label !== '')]
+		package: {
+			categories: getCategories(packages)
 		},
 		template: {
-			tags: extractUnique(templates, 'tags'),
-			categories: extractUnique(templates, 'category')
-		},
-		tool: {
-			tags: extractUnique(tools, 'tags'),
-			categories: extractUnique(tools, 'category')
+			categories: getCategories(templates)
 		}
 	};
 
@@ -40,9 +33,9 @@
 	let url = 'https://svelte-lorem-ipsum.dev';
 	let description = 'A dummy text generator that does not exist';
 	let npm = 'svelte-lorem-ipsum';
-	let category;
-	let tags;
+	let categories;
 	let repository = 'https://github.com/sveltejs/svelte-lorem-ipsum';
+	let manager = { value: 'npm' };
 
 	$: pathName = `${type.value}s`;
 	$: jsonSnippet = {
@@ -50,12 +43,10 @@
 		url: url ? url : undefined,
 		repository: repository ? repository : undefined,
 		description,
-		npm: npm ? npm : undefined,
-		category: category?.value,
-		tags: tags?.map((tag) => tag.value)
+		[manager.value]: type.value === 'package' ? npm : undefined,
+		categories: categories?.map((c) => c.value)
 	};
 
-	$: currentTags = data[type.value].tags;
 	$: currentCategories = data[type.value].categories;
 
 	onMount(() => {
@@ -63,26 +54,22 @@
 		type = types.find((t) => t.value == typeQuery) || types[0];
 	});
 
-	async function clearCategoryAndTags() {
+	async function clearCategories() {
 		await tick();
-		category = null;
-		tags = null;
+		categories = null;
 	}
 </script>
 
-<Seo title="Submit component" />
+<Seo title="Submit package" />
 
-<h1>Submitting a new component</h1>
+<h1>Submitting a new package</h1>
 <p>
-	To add a new component on the website, the process is rather simple. You have to add a snippet in
+	To add a new package on the website, the process is rather simple. You have to add a snippet in
 	the appropriate file.
 </p>
-
-<h2>Generating file contents snippet</h2>
-<p>
-	Each component is represented by a JSON Object. Use the generator below to generate the Object.
-</p>
-
+<br />
+<p>Each package is represented by a JSON Object. Use the generator below to generate the Object.</p>
+<br />
 <p><code>*</code> marked fields are required</p>
 <div class="json-generator">
 	<div class="input-wrapper">
@@ -94,7 +81,7 @@
 				isClearable={false}
 				showIndicator
 				bind:value={type}
-				on:select={clearCategoryAndTags}
+				on:select={clearCategories}
 			/>
 			<span class="input-helper">The type of snippet to generate</span>
 		</div>
@@ -103,7 +90,7 @@
 		<label for="title" class="required">Title:</label>
 		<div>
 			<input id="title" type="text" required bind:value={title} />
-			<span class="input-helper">Name of the component</span>
+			<span class="input-helper">Name of the package</span>
 		</div>
 	</div>
 	<div class="input-wrapper">
@@ -126,34 +113,47 @@
 		<label for="desc">Description:</label>
 		<div>
 			<input id="desc" type="text" bind:value={description} />
-			<span class="input-helper">A short description of the component</span>
+			<span class="input-helper">A short description of the package</span>
 		</div>
 	</div>
-	<div class="input-wrapper">
-		<label for="npm">NPM:</label>
-		<div>
-			<input id="npm" type="text" bind:value={npm} />
-			<span class="input-helper">The npm name of the component</span>
+	{#if type.value === 'package'}
+		<div class="input-wrapper">
+			<label for="npm">
+				<SvelteSelect
+					id="categories"
+					items={[
+						{ value: 'npm', label: 'NPM' },
+						{ value: 'jsr', label: 'JSR' },
+						{ value: 'gem', label: 'Ruby' }
+					]}
+					showIndicator
+					isClearable={false}
+					bind:value={manager}
+				/>
+			</label>
+			<div>
+				<input id="npm" type="text" bind:value={npm} />
+				<span class="input-helper"
+					>The {manager.value === 'npm'
+						? 'npm'
+						: manager.value === 'jsr'
+							? 'deno jsr package'
+							: 'gem'} name of the package</span
+				>
+			</div>
 		</div>
-	</div>
+	{/if}
 	<div class="input-wrapper">
-		<label for="category">Category:</label>
+		<label for="categories" class="required">Categories:</label>
 		<div>
 			<SvelteSelect
-				id="category"
+				id="categories"
 				items={currentCategories}
-				isClearable={false}
 				showIndicator
-				bind:value={category}
+				isMulti
+				bind:value={categories}
 			/>
-			<span class="input-helper">The category of the component</span>
-		</div>
-	</div>
-	<div class="input-wrapper">
-		<label for="tags" class="required">Tags:</label>
-		<div>
-			<SvelteSelect id="category" items={currentTags} showIndicator isMulti bind:value={tags} />
-			<span class="input-helper">A list of tags</span>
+			<span class="input-helper">A list of categories</span>
 		</div>
 	</div>
 </div>
@@ -166,9 +166,9 @@
 </pre>
 <br />
 Copy this snippet and add it to
-<a href="{repoURL}/blob/main/src/routes/{pathName}/{pathName}.json">{pathName}.json</a>. You can
-propose your changes
-<a href="{repoURL}/edit/main/src/routes/{pathName}/{pathName}.json">directly in GitHub</a>.
+<a href="{repoURL}/edit/main/src/routes/{pathName}/{pathName}.json">{pathName}.json</a>. Before
+submitting a PR, please clone your changes locally and run:
+<pre>pnpm run lint</pre>
 
 <style>
 	.json-generator,

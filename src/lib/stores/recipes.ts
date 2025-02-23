@@ -1,7 +1,6 @@
-import type { Writable } from 'svelte/store';
 import { writable } from 'svelte/store';
 
-type Recipe = {
+export type Recipe = {
 	title: string;
 	layout: string;
 	icon?: string;
@@ -10,9 +9,4 @@ type Recipe = {
 	children: Recipe[];
 };
 
-type RecipeStore = {
-	subscribe: Writable<Recipe[]>['subscribe'];
-	set: Writable<Recipe[]>['set'];
-};
-
-export const categories: RecipeStore = writable([]);
+export const categories = writable<Recipe[]>([]);

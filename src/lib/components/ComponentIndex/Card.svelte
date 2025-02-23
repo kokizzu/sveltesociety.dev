@@ -1,137 +1,137 @@
-<script>
+<script lang="ts">
 	import Tag from '../Tag.svelte';
 	import { copyToClipboard } from '$lib/utils/clipboard';
 	import { packageManager as manager } from '$stores/packageManager';
+	import { relativeDate } from '$utils/relativeDate';
+	import { derived } from 'svelte/store';
 
-	export let active = false;
-	export let title = '';
-	export let description = '';
-	export let tags = [];
-	export let stars;
-	export let url = '';
-	export let npm = '';
-	export let repository = undefined;
+	export let title: string;
+	export let description: string;
+	export let stars: string;
+	export let npm: string | undefined = undefined;
+	export let gem: string | undefined = undefined;
+	export let jsr: string | undefined = undefined;
+	export let repository: string | undefined = undefined;
+	export let date = undefined;
+	export let version = undefined;
 
 	let clipboardCopy = false;
 
 	const copy = () => {
-		copyToClipboard(`${packageManagers[$manager]} ${cleanupNpm(npm)}`).then(
-			() => (clipboardCopy = false)
-		);
+		copyToClipboard($managerAction).then(() => (clipboardCopy = false));
 		clipboardCopy = true;
 	};
 
-	const packageManagers = {
-		npm: 'npm install',
-		pnpm: 'pnpm add',
-		yarn: 'yarn add'
-	};
+	const managerAction = derived(manager, ($manager) => {
+		if (npm && $manager.includes('npm')) {
+			return `npm install ${npm}`;
+		}
+		if (npm && $manager.includes('pnpm')) {
+			return `pnpm add ${npm}`;
+		}
+		if (npm && $manager.includes('yarn')) {
+			return `yarn add ${npm}`;
+		}
+		if (npm && $manager.includes('deno')) {
+			return `deno install npm:${npm}`;
+		}
 
-	const cleanupNpm = (npm) => {
-		return npm.replace('https://www.npmjs.com/package/', '');
-	};
+		if (gem && $manager.includes('gem')) {
+			return `gem install ${gem}`;
+		}
+		if (gem && $manager.includes('bundler')) {
+			return `bundle add ${gem}`;
+		}
+
+		if (jsr && $manager.includes('npm')) {
+			return `npx jsr add ${jsr}`;
+		}
+		if (jsr && $manager.includes('pnpm')) {
+			return `pnpm dlx jsr add ${jsr}`;
+		}
+		if (jsr && $manager.includes('yarn')) {
+			return `yarn dlx jsr add ${jsr}`;
+		}
+		if (jsr && $manager.includes('deno')) {
+			return `deno install ${jsr}`;
+		}
+
+		return '';
+	});
 </script>
 
-<div class="card" class:active id="component-{title}">
-	<h3>
-		<a href="#component-{title}">#</a>
-		{#if url || repository}<a href={url || repository}>{title}</a>{:else}<span>{title}</span>{/if}
-		{#if npm}<Tag
-				click={() => copy()}
-				variant="copy"
-				title={clipboardCopy ? 'copied!' : `${packageManagers[$manager]} ${cleanupNpm(npm)}`}
-			/>{/if}
-	</h3>
-	<p class="flex-grow">{description}</p>
-	{#if tags}
-		<div class="card__tags">
-			{#each tags as tag}
-				<Tag title={tag} variant="blue" />
-			{/each}
-		</div>
-	{/if}
-	<div class="card__bottom">
+<div class="card flex flex-col rounded-md p-3 text-base lg:text-lg" id={title}>
+	<div class="flex justify-between align-top">
 		<div>
-			{#if (repository || url || '').includes('github')}
-				<a title="Go to the source code" href={repository || url}
-					><img style="display:inline" src="/images/github_logo.svg" alt="github logo" /></a
+			<h3 class="text-xl">
+				<a href="#{title}"># {title}</a>
+			</h3>
+		</div>
+		<div>
+			{#if repository?.includes('github')}
+				<a
+					class="repo box-border flex aspect-square rounded-full border-none"
+					title="Go to the source code"
+					target="_blank"
+					href={repository}
 				>
-			{:else if (repository || url || '').includes('gitlab')}
-				<a title="Go to the source code" href={repository || url}
-					><img style="display:inline" src="/images/gitlab_logo.svg" alt="gitlab logo" /></a
+					<img style="display:inline" src="/images/github_logo.svg" alt="github logo" />
+				</a>
+			{:else if repository?.includes('gitlab')}
+				<a
+					class="repo box-border flex aspect-square rounded-full border-none"
+					title="Go to the source code"
+					target="_blank"
+					href={repository}
 				>
-				<!-- {:else} -->
+					<img style="display:inline" src="/images/gitlab_logo.svg" alt="gitlab logo" />
+				</a>
+			{:else if repository}
+				<a
+					class="repo box-border flex aspect-square rounded-full border-none"
+					title="Go to the source code"
+					target="_blank"
+					href={repository}
+				>
+					🌐
+				</a>
 			{/if}
 		</div>
+	</div>
+
+	{#if npm || gem || jsr}
+		<Tag click={() => copy()} variant="copy" title={clipboardCopy ? 'copied!' : $managerAction} />
+	{/if}
+	<p class="flex-grow pb-6">{description}</p>
+	<div class="flex items-end justify-between">
 		<div>
 			{#if typeof stars !== 'undefined'}
 				&#9733;
 				<code>{stars}</code>
 			{/if}
 		</div>
-		<!-- commenting out dates just cause it is not very updated yet - all the cards show same date. put back in when we have better scraping -->
-		<!-- <datetime value={addedOn}>{new Intl.DateTimeFormat('en-Us').format(Date.parse(addedOn))}</datetime> -->
+		{#if date && version}<span class="text-sm">Updated {relativeDate(date)} ({version})</span>{/if}
 	</div>
 </div>
 
 <style>
 	.card {
-		display: flex;
-		flex-direction: column;
-		max-width: var(--width-card);
-		padding: 14px;
 		background: #f3f6f9;
-		border-radius: 5px;
 	}
-	.card h3 {
-		word-break: none;
-		font-size: var(--font-300);
-	}
-	.active,
 	.card:hover {
 		background: #e8f3fe;
 	}
-	.card__tags {
-		display: flex;
-		flex-direction: row;
-		flex-wrap: wrap;
-		margin-bottom: 1rem;
-	}
-	.card__bottom {
-		display: flex;
-		justify-content: space-between;
-		align-items: end;
-	}
-	.card__bottom > * {
-		white-space: nowrap;
-	}
-	.card__bottom a {
-		border-bottom: none;
-		aspect-ratio: 1/1;
-		display: flex;
+	.repo {
 		min-height: 26px;
 		padding: 4px;
-		border-radius: 50%;
 		margin: -4px;
-		box-sizing: border-box;
 		background-color: rgba(0, 0, 0, 0);
 		transition: background-color 200ms ease-out;
+		text-decoration: none;
+		font-size: 1rem;
+		line-height: 18px;
 	}
-	.card__bottom a:hover {
+	.repo:hover {
 		background-color: rgba(0, 0, 0, 0.25);
-	}
-
-	.flex-grow {
-		flex-grow: 1;
-	}
-
-	@media screen and (max-width: 400px) {
-		.card {
-			font-size: 0.9rem;
-		}
-
-		.card h3 {
-			font-size: 24px;
-		}
 	}
 </style>

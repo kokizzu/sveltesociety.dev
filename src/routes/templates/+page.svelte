@@ -1,20 +1,18 @@
-<script>
-	import templates from './templates.json';
-	import SearchableJson from '../searchableJson.svelte';
-	import { injectStars } from '$utils/stars';
+<script lang="ts">
+	import SearchableJson from '$lib/SearchableJson.svelte';
 
-	const categoryId = {
-		Sapper: 'sapper',
-		Svelte: 'svelte',
-		'Svelte Add': 'adders',
-		SvelteKit: 'svelte-kit'
-	};
+	export let data;
 </script>
 
 <SearchableJson
-	{categoryId}
-	data={injectStars(templates)}
-	displayTitle="Template"
+	data={data.templates}
+	categories={data.categories}
+	selectedCategories={data.selectedCategories}
+	sortableFields={[
+		{ value: 'stars', label: 'Stars', asc: false },
+		{ value: 'title', label: 'Name', asc: true }
+	]}
+	displayTitle="Templates"
 	displayTitleSingular="template"
 	submittingType="template"
 />

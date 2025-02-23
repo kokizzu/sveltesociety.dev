@@ -1,6 +1,6 @@
 import path from 'node:path';
-import { vitePreprocess } from '@sveltejs/kit/vite';
-import adapter from '@sveltejs/adapter-static';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import adapter from '@sveltejs/adapter-auto';
 import hljs from 'highlight.js';
 import { mdsvex, escapeSvelte } from 'mdsvex';
 import rehypeSlug from 'rehype-slug';
@@ -33,7 +33,6 @@ const config = {
 		adapter: adapter(),
 		alias: {
 			$components: path.resolve('./src/lib/components'),
-			$layout: path.resolve('./src/lib/components/layout'),
 			$layouts: path.resolve('./src/lib/layouts'),
 			$utils: path.resolve('./src/lib/utils'),
 			$styles: path.resolve('./src/lib/styles'),
@@ -44,9 +43,11 @@ const config = {
 				config.include = [
 					...config.include,
 					'../scripts/**/*.js',
+					'../.eslintrc.cjs',
+					'../postcss.config.js',
 					'../prettier.config.js',
 					'../svelte.config.js',
-					'../vite.config.js'
+					'../tailwind.config.cjs'
 				];
 				return config;
 			}

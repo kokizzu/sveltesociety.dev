@@ -1,4 +1,4 @@
-<script>
+<script lang="ts">
 	import Icon from '$lib/components/Icon/index.svelte';
 	import societies from './societies.json';
 </script>
@@ -45,6 +45,15 @@
 						<span class="icon-wrapper">
 							<Icon name="github" />
 							<a href={society.githuburl} target="_blank" rel="noopener">GitHub</a>
+						</span>
+					</li>
+				{/if}
+
+				{#if society.discord}
+					<li>
+						<span class="icon-wrapper">
+							<Icon name="discord" />
+							<a href={society.discord} target="_blank" rel="noopener">Discord</a>
 						</span>
 					</li>
 				{/if}
